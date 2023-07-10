@@ -12,7 +12,7 @@ export const Snake = (props) => {
   const [snake, setSnake] = useState(props.initialSnake || TOP_LEFT_CORNER_3_DOWN_SNAKE);
   const [map, setMap] = useState([]);
   const [apple, setApple] = useState({});
-  const [direction, setDirection] = useState(null);
+  const [direction, setDirection] = useState(props.initialDirection);
   const [moveInterval, setMoveInternal] = useState("");
   const [moveTrigger, setMoveTrigger] = useState(false);
   const [start, setStart] = useState(props.startOnLoad);
@@ -81,7 +81,7 @@ export const Snake = (props) => {
     let board = createMap(size);
     setScore(0);
     setSnake(props.initialSnake || TOP_LEFT_CORNER_3_DOWN_SNAKE);
-    setDirection(null);
+    setDirection(props.initialDirection);
     placeApple(board);
     props.onGameStart && props.onGameStart();
   }
