@@ -2,12 +2,14 @@ import React, { useEffect, useState } from "react";
 import "../../styles.css";
 import { Board } from "../Board";
 
+export const TOP_LEFT_CORNER_3_DOWN_SNAKE = [
+  { x: 0, y: 0 },
+  { x: 0, y: 1 },
+  { x: 0, y: 2 },
+]
+
 export const Snake = (props) => {
-  const [snake, setSnake] = useState([
-    { x: 0, y: 0 },
-    { x: 0, y: 1 },
-    { x: 0, y: 2 },
-  ]);
+  const [snake, setSnake] = useState(props.initialSnake || TOP_LEFT_CORNER_3_DOWN_SNAKE);
   const [map, setMap] = useState([]);
   const [apple, setApple] = useState({});
   const [direction, setDirection] = useState(null);
@@ -78,11 +80,7 @@ export const Snake = (props) => {
     setGameOver(false)
     let board = createMap(size);
     setScore(0);
-    setSnake([
-      { x: 0, y: 0 },
-      { x: 0, y: 1 },
-      { x: 0, y: 2 },
-    ]);
+    setSnake(props.initialSnake || TOP_LEFT_CORNER_3_DOWN_SNAKE);
     setDirection(null);
     placeApple(board);
     props.onGameStart && props.onGameStart();
