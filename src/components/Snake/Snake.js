@@ -13,7 +13,7 @@ export const Snake = (props) => {
   const [direction, setDirection] = useState(null);
   const [moveInterval, setMoveInternal] = useState("");
   const [moveTrigger, setMoveTrigger] = useState(false);
-  const [start, setStart] = useState(false);
+  const [start, setStart] = useState(props.startOnLoad);
   const [score, setScore] = useState(0);
   const [shake, setShake] = useState(false);
   const [gameOver, setGameOver] = useState(false);
