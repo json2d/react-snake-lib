@@ -85,6 +85,15 @@ export const Snake = (props) => {
     placeApple(board);
     props.onGameStart && props.onGameStart();
   }
+
+  useEffect(() => {
+    if (props.startOnLoad) {
+      let board = createMap(size);
+      placeApple(board);
+      props.onGameStart && props.onGameStart();
+    }
+  }, [])
+  
   function createMap(length) {
     let board = []
     for (let i = 0; i < length; i++) {
