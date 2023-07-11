@@ -94,6 +94,7 @@ export const Snake = (props) => {
     }
   }, [])
   
+  // TODO: extract to top-level scope
   function createMap(length) {
     let board = []
     for (let i = 0; i < length; i++) {
@@ -107,7 +108,7 @@ export const Snake = (props) => {
       }
       board.push(row);
     }
-    setMap(board);
+    setMap(board); // TODO: remove from function
     return board;
   }
 
@@ -162,7 +163,7 @@ export const Snake = (props) => {
   useEffect(() => {
     let grow = false;
     let gameOver = false;
-    if (!start) return;
+    if (!start || map.length === 0) return;
     let newSnake = snake.map((element, index) => {
       if (index === snake.length - 1) {
         if (direction === "down") {
