@@ -8,6 +8,51 @@ export const TOP_LEFT_CORNER_3_DOWN_SNAKE = [
   { x: 0, y: 2 },
 ]
 
+function createMap(length) {
+  let board = []
+  for (let i = 0; i < length; i++) {
+    let row = [];
+    for (let j = 0; j < length; j++) {
+      if ((j === 0 && i === 0) || (j === 0 && i === 1) || (j === 0 && i === 2)) {
+        row.push({ snake: true, apple: false, x: j, y: i, head: i === 2 ? true : false });
+      } else {
+        row.push({ snake: false, apple: false, x: j, y: i });
+      }
+    }
+    board.push(row);
+  }
+  return board;
+}
+
+function placeApple(board) {
+  let freeCell = false;
+  const ySize = board.length
+  const xSize = board[0].length
+  while (true) {
+    board.map((element => {
+      if (element.some(i => !i.apple && !i.snake)) {
+        freeCell = true;
+      }
+    }))
+    if (!freeCell) {
+      break;
+    }
+
+    let x = Math.floor(Math.random() * xSize);
+    let y = Math.floor(Math.random() * ySize);
+    if (!getCellInfo(board, x, y).snake && !getCellInfo(board, x, y).apple) {
+      return { x, y };
+    }
+  }
+}
+
+function getCellInfo(board, x, y) {
+  const ySize = board.length
+  const xSize = board[0].length
+  if (x === xSize || y === ySize || x < 0 || y < 0) return false;
+  return board[y][x];
+}
+
 export const Snake = (props) => {
   const [snake, setSnake] = useState(props.initialSnake || TOP_LEFT_CORNER_3_DOWN_SNAKE);
   const [map, setMap] = useState([]);
@@ -78,65 +123,26 @@ export const Snake = (props) => {
   function startGame() {
     setStart(true);
     setGameOver(false)
-    let board = createMap(size);
+    const board = createMap(size);
+    setMap(board);
     setScore(0);
     setSnake(props.initialSnake || TOP_LEFT_CORNER_3_DOWN_SNAKE);
     setDirection(props.initialDirection);
-    placeApple(board);
+    const apple = placeApple(board);
+    setApple(apple)
     props.onGameStart && props.onGameStart();
   }
 
   useEffect(() => {
     if (props.startOnLoad) {
-      let board = createMap(size);
-      placeApple(board);
+      const board = createMap(size);
+      setMap(board);
+      const apple = placeApple(board);
+      setApple(apple);
+
       props.onGameStart && props.onGameStart();
     }
   }, [])
-  
-  // TODO: extract to top-level scope
-  function createMap(length) {
-    let board = []
-    for (let i = 0; i < length; i++) {
-      let row = [];
-      for (let j = 0; j < length; j++) {
-        if ((j === 0 && i === 0) || (j === 0 && i === 1) || (j === 0 && i === 2)) {
-          row.push({ snake: true, apple: false, x: j, y: i, head: i === 2 ? true : false });
-        } else {
-          row.push({ snake: false, apple: false, x: j, y: i });
-        }
-      }
-      board.push(row);
-    }
-    setMap(board); // TODO: remove from function
-    return board;
-  }
-
-  function placeApple(board) {
-    let freeCell = false;
-    while (true) {
-      let array = board ?? map;
-      array.map((element => {
-        if (element.some(i => !i.apple && !i.snake)) {
-          freeCell = true;
-        }
-      }))
-      if (!freeCell) {
-        break;
-      }
-
-      let x = Math.floor(Math.random() * size);
-      let y = Math.floor(Math.random() * size);
-      if (!getCellInfo(x, y, board).snake && !getCellInfo(x, y, board).apple) {
-        setApple({ x: x, y: y });
-        break;
-      }
-    }
-  }
-  function getCellInfo(x, y, board) {
-    if (x === size || y === size || x < 0 || y < 0) return false;
-    return board ? board[y][x] : map[y][x];
-  }
 
   useEffect(() => {
     props.onScoreChange && props.onScoreChange(score);
@@ -173,9 +179,9 @@ export const Snake = (props) => {
           }
           let nextCell;
           if(noWall && element.y + 1 === size){
-            nextCell = getCellInfo(element.x, 0);
+            nextCell = getCellInfo(map, element.x, 0);
           } else {
-            nextCell = getCellInfo(element.x, element.y + 1);
+            nextCell = getCellInfo(map, element.x, element.y + 1);
           }
           if (nextCell.snake) {
             gameOver = true;
@@ -194,9 +200,9 @@ export const Snake = (props) => {
           }
           let nextCell;
           if(noWall && element.x + 1 === size){
-            nextCell = getCellInfo(0, element.y);
+            nextCell = getCellInfo(map, 0, element.y);
           } else {
-            nextCell = getCellInfo(element.x + 1, element.y);
+            nextCell = getCellInfo(map, element.x + 1, element.y);
           }
           if (nextCell.snake) {
             gameOver = true;
@@ -215,9 +221,9 @@ export const Snake = (props) => {
           }
           let nextCell;
           if(noWall && element.y -1 === -1){
-            nextCell = getCellInfo(element.x, size - 1);
+            nextCell = getCellInfo(map, element.x, size - 1);
           } else {
-            nextCell = getCellInfo(element.x, element.y - 1);
+            nextCell = getCellInfo(map, element.x, element.y - 1);
           }
           if (nextCell.snake) {
             gameOver = true;
@@ -236,9 +242,9 @@ export const Snake = (props) => {
           }
           let nextCell;
           if(noWall && element.x -1 === -1){
-            nextCell = getCellInfo(size - 1, element.y);
+            nextCell = getCellInfo(map, size - 1, element.y);
           } else {
-            nextCell = getCellInfo(element.x - 1, element.y);
+            nextCell = getCellInfo(map, element.x - 1, element.y);
           }
           if (nextCell.snake) {
             gameOver = true;
@@ -281,36 +287,36 @@ export const Snake = (props) => {
 
       switch (moveDirection) {
         case "down":
-          if (y - 1 > -1 && !getCellInfo(snake[0].x, snake[0].y - 1).snake && !getCellInfo(snake[0].x, snake[0].y - 1).apple) {
+          if (y - 1 > -1 && !getCellInfo(map, snake[0].x, snake[0].y - 1).snake && !getCellInfo(map, snake[0].x, snake[0].y - 1).apple) {
             newSnake.unshift({ x: x, y: y - 1 });
-          } else if (x - 1 > -1 && !getCellInfo(snake[0].x - 1, snake[0].y).snake && !getCellInfo(snake[0].x - 1, snake[0].y).apple) {
+          } else if (x - 1 > -1 && !getCellInfo(map, snake[0].x - 1, snake[0].y).snake && !getCellInfo(map, snake[0].x - 1, snake[0].y).apple) {
             newSnake.unshift({ x: x - 1, y: y });
           } else {
             newSnake.unshift({ x: x + 1, y: y });
           }
           break;
         case "up":
-          if (y + 1 < size && !getCellInfo(snake[0].x, snake[0].y + 1).snake && !getCellInfo(snake[0].x, snake[0].y + 1).apple) {
+          if (y + 1 < size && !getCellInfo(map, snake[0].x, snake[0].y + 1).snake && !getCellInfo(map, snake[0].x, snake[0].y + 1).apple) {
             newSnake.unshift({ x: x, y: y + 1 });
-          } else if (x - 1 > -1 && !getCellInfo(snake[0].x - 1, snake[0].y).snake && !getCellInfo(snake[0].x - 1, snake[0].y).apple) {
+          } else if (x - 1 > -1 && !getCellInfo(map, snake[0].x - 1, snake[0].y).snake && !getCellInfo(map, snake[0].x - 1, snake[0].y).apple) {
             newSnake.unshift({ x: x - 1, y: y });
           } else {
             newSnake.unshift({ x: x + 1, y: y });
           }
           break;
         case "left":
-          if (x + 1 < size && !getCellInfo(snake[0].x + 1, snake[0].y).snake && !getCellInfo(snake[0].x + 1, snake[0].y).apple) {
+          if (x + 1 < size && !getCellInfo(map, snake[0].x + 1, snake[0].y).snake && !getCellInfo(map, snake[0].x + 1, snake[0].y).apple) {
             newSnake.unshift({ x: x + 1, y: y });
-          } else if (y - 1 > -1 && !getCellInfo(snake[0].x, snake[0].y - 1).snake && !getCellInfo(snake[0].x, snake[0].y - 1).apple) {
+          } else if (y - 1 > -1 && !getCellInfo(map, snake[0].x, snake[0].y - 1).snake && !getCellInfo(map, snake[0].x, snake[0].y - 1).apple) {
             newSnake.unshift({ x: x, y: y - 1 });
           } else {
             newSnake.unshift({ x: x, y: y + 1 });
           }
           break;
         case "right":
-          if (x - 1 > -1 && !getCellInfo(snake[0].x - 1, snake[0].y).snake && !getCellInfo(snake[0].x - 1, snake[0].y).apple) {
+          if (x - 1 > -1 && !getCellInfo(map, snake[0].x - 1, snake[0].y).snake && !getCellInfo(map, snake[0].x - 1, snake[0].y).apple) {
             newSnake.unshift({ x: x - 1, y: y });
-          } else if (y - 1 > -1 && !getCellInfo(snake[0].x, snake[0].y - 1).snake && !getCellInfo(snake[0].x, snake[0].y - 1).apple) {
+          } else if (y - 1 > -1 && !getCellInfo(map, snake[0].x, snake[0].y - 1).snake && !getCellInfo(map, snake[0].x, snake[0].y - 1).apple) {
             newSnake.unshift({ x: x, y: y - 1 });
           } else {
             newSnake.unshift({ x: x, y: y + 1 });
@@ -321,7 +327,8 @@ export const Snake = (props) => {
     if (!gameOver) {
       setSnake(newSnake);
       if (grow) {
-        placeApple();
+        const apple = placeApple(map);
+        setApple(apple);
       }
     }
   }, [moveTrigger]);
